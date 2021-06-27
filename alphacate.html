@@ -1,0 +1,245 @@
+<script type="text/javascript">
+    /* global RED */
+    RED.nodes.registerType('alphacate', {
+        category: 'stocks',
+        color: '#DDDDDD',
+        defaults: {
+            name:       { value: "" },
+            useData:  { value: "closePrice" },
+            mergeData:  { value: false },
+            enableATR:  { value: false },
+            enableBB:  { value: false },
+            enableEMA:  { value: false },
+            enableLWMA:  { value: false },
+            enableMACD:  { value: false },
+            enableMFI:  { value: false },
+            enableOBV:  { value: false },
+            enableRSI:  { value: false },
+            enableSMA:  { value: false },
+            enableSMMA:  { value: false },
+            enableSO:  { value: false },
+            enableROC:  { value: false },
+            enableWMA:  { value: false }
+        },
+        inputs: 1,
+        outputs: 1,
+        icon: "function",
+        label: function() {
+            let count = 0;
+            for (var config of Object.keys(this)){
+                if (config.substring(0,6) == "enable" && this[config]){
+                    count++;
+                }
+            }
+            let suffix = (count > 0) ? " (" + count + ")" : "" ;
+            return this.name || "alphacate" + suffix;
+        }
+    });
+
+</script>
+
+<!------------------------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------->
+<style type="text/css">
+    .checkbox-row label{
+        width:350px !important;
+    }
+    .checkbox-row input{
+        width:50px !important;
+        margin-top: 0px !important;
+    }
+    .short-name{
+        width: 65px;
+        float:left;
+        font-weight:bold;
+    }
+</style>
+<script type="text/x-red" data-template-name="alphacate">
+    <!-----------------NAME--------------------->
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <!-----------------FUNCTION--------------------->
+    <div class="form-row">
+        <label for="node-input-useData"> Price to use </label>
+        <select id="node-input-useData">
+            <option value=	"closePrice" selected>	Close	</option>
+            <option value=	"openPrice">	Open	</option>
+            <option value=	"highPrice">	High	</option>
+            <option value=	"lowPrice">	    Low	    </option>
+        </select>
+    </div>
+    <div class="form-row checkbox-row">
+        <input type="checkbox" id="node-input-mergeData">
+        <label for="node-input-mergeData"> Merge Input Data and Analysis Data</label>
+    </div>
+    <h3> Technical Indicators </h3>
+    <div class="form-row checkbox-row">
+        <input type="checkbox" id="node-input-enableATR">
+        <label for="node-input-enableATR"><span class="short-name">ATR</span> <small>AverageTrueRange</small></label>
+    </div>
+    <div class="form-row checkbox-row">
+        <input type="checkbox" id="node-input-enableBB">
+        <label for="node-input-enableBB"><span class="short-name">BB</span> <small>BollingerBands</small></label>
+    </div>
+    <div class="form-row checkbox-row">
+        <input type="checkbox" id="node-input-enableEMA">
+        <label for="node-input-enableEMA"><span class="short-name">EMA</span> <small>ExponentialMovingAverage</small></label>
+    </div>
+    <div class="form-row checkbox-row">
+        <input type="checkbox" id="node-input-enableLWMA">
+        <label for="node-input-enableLWMA"><span class="short-name">LWMA</span> <small>LinearlyWeightedMovingAverage</small></label>
+    </div>
+    <div class="form-row checkbox-row">
+        <input type="checkbox" id="node-input-enableMACD">
+        <label for="node-input-enableMACD"><span class="short-name">MACD</span> <small>MovingAverageConvergenceDivergence</small></label>
+    </div>
+    <div class="form-row checkbox-row">
+        <input type="checkbox" id="node-input-enableMFI">
+        <label for="node-input-enableMFI"><span class="short-name">MFI</span> <small>MoneyFlowIndex</small></label>
+    </div>
+    <div class="form-row checkbox-row">
+        <input type="checkbox" id="node-input-enableOBV">
+        <label for="node-input-enableOBV"><span class="short-name">OBV</span> <small>OnBalanceVolume</small></label>
+    </div>
+    <div class="form-row checkbox-row">
+        <input type="checkbox" id="node-input-enableRSI">
+        <label for="node-input-enableRSI"><span class="short-name">RSI</span> <small>RelativeStrengthIndex</small></label>
+    </div>
+    <div class="form-row checkbox-row">
+        <input type="checkbox" id="node-input-enableSMA">
+        <label for="node-input-enableSMA"><span class="short-name">SMA</span> <small>SimpleMovingAverage</small></label>
+    </div>
+    <div class="form-row checkbox-row">
+        <input type="checkbox" id="node-input-enableSMMA">
+        <label for="node-input-enableSMMA"><span class="short-name">SMMA</span> <small>SmoothedMovingAverage</small></label>
+    </div>
+    <div class="form-row checkbox-row">
+        <input type="checkbox" id="node-input-enableSO">
+        <label for="node-input-enableSO"><span class="short-name">SO</span> <small>StochasticOscillator</small></label>
+    </div>
+    <div class="form-row checkbox-row">
+        <input type="checkbox" id="node-input-enableROC">
+        <label for="node-input-enableROC"><span class="short-name">ROC</span> <small>RateOfChange</small></label>
+    </div>
+    <div class="form-row checkbox-row">
+        <input type="checkbox" id="node-input-enableWMA">
+        <label for="node-input-enableWMA"><span class="short-name">WMA</span> <small>WeightedMovingAverage</small></label>
+    </div>
+
+</script>
+
+<script type="text/x-red" data-help-name="alphacate">
+    <p>Universal node that wraps all of the </p>
+    <h3>Inputs</h3>
+    <p>See configuration panel for examples of each request </p>
+    <h3>Outputs</h3>
+    <dl class="message-properties">
+        <dt>payload
+           <span class="property-type">object</span>
+       </dt>
+        <h3>Details</h3>
+        <p>Payload is the full response object from the API</p>
+        <dt>topic
+           <span class="property-type">string</span>
+       </dt>
+        <h3>Details</h3>
+        <p>Topic is the type of event being emitted from the node</p>
+</script>
+
+<!-- http://rickkas7.github.io/mustache/
+
+mustache template for development:
+
+--------- Default Properties ------
+
+{{#a}}
+        enable{{0}}:  { value: false },
+{{/a}}
+
+--------- HTML Checkboxes -----
+
+{{#a}}
+    <div class="form-row checkbox-row">
+        <input type="checkbox" id="node-input-enable{{0}}">
+        <label for="node-input-enable{{0}}"><span class="short-name">{{0}}</span> <small>{{1}}</small></label>
+    </div>
+{{/a}}
+
+
+--------- input data:
+
+ATR:AverageTrueRange
+BB:BollingerBands
+EMA:ExponentialMovingAverage
+LWMA:LinearlyWeightedMovingAverage
+MACD:MovingAverageConvergenceDivergence
+MFI:MoneyFlowIndex
+OBV:OnBalanceVolume
+RSI:RelativeStrengthIndex
+SMA:SimpleMovingAverage
+SMMA:SmoothedMovingAverage
+SO:StochasticOscillator
+ROC:RateOfChange
+WMA:WeightedMovingAverage
+
+    
+
+{
+	"a": [
+		[
+			"ATR",
+			"AverageTrueRange"
+		],
+		[
+			"BB",
+			"BollingerBands"
+		],
+		[
+			"EMA",
+			"ExponentialMovingAverage"
+		],
+		[
+			"LWMA",
+			"LinearlyWeightedMovingAverage"
+		],
+		[
+			"MACD",
+			"MovingAverageConvergenceDivergence"
+		],
+		[
+			"MFI",
+			"MoneyFlowIndex"
+		],
+		[
+			"OBV",
+			"OnBalanceVolume"
+		],
+		[
+			"RSI",
+			"RelativeStrengthIndex"
+		],
+		[
+			"SMA",
+			"SimpleMovingAverage"
+		],
+		[
+			"SMMA",
+			"SmoothedMovingAverage"
+		],
+		[
+			"SO",
+			"StochasticOscillator"
+		],
+		[
+			"ROC",
+			"RateOfChange"
+		],
+		[
+			"WMA",
+			"WeightedMovingAverage"
+		]
+	]
+}
