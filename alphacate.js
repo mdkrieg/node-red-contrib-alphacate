@@ -32,90 +32,139 @@ module.exports = function(RED) {
         var node = this;
         
         node.on('input', function(msg) {
-            node.status({text:"calculating...",fill:"blue"});
-            
-            let input_data = [];
-            let special_data = {
-                ATR: [],
-                MFI: [],
-                OBV: []
-            };
-            for (var dp in msg.payload){
-                input_data.push(msg.payload[dp][config.useData]);
-                // specify here to handle indicators----
-                // with non-default input requirements--
-                special_data.ATR.push({
-                    high:  msg.payload[dp].highPrice,
-                    low:   msg.payload[dp].lowPrice,
-                    close: msg.payload[dp].closePrice
-                });
-                special_data.MFI.push({
-                    high:  msg.payload[dp].highPrice,
-                    low:   msg.payload[dp].lowPrice,
-                    close: msg.payload[dp].closePrice,
-                    volume:msg.payload[dp].volume
-                });
-                special_data.OBV.push({
-                    price: msg.payload[dp][config.useData],
-                    volume:msg.payload[dp].volume
-                });
-            }
-            if (!config.mergeData){
-                msg.data = JSON.parse(JSON.stringify(msg.payload));
-                msg.payload = {};
-            }
-            msg.options = {};
-            // call all the enabled indicators
-            let completedFunctions = {}; // used as "done" test
-            // define calculation handler
-            let resolveComplete = function(fx, err = false){
-                completedFunctions[fx] = true;
-                for(var c in completedFunctions){
-                    if(!completedFunctions[c]) return;
+            config.mergeData = true; //forcing this as it doesn't work with object type
+            // and it doesn't seem that useful to have non-merged data anyway
+            if(Array.isArray(msg.payload)){
+                // Parse as simple array of bars
+                analyzeData(node, config, msg, msg.payload);
+            }else if (typeof msg.payload === 'object' && msg.payload !== null){
+                // Parse as object of {"Symbol": [bars]}
+                //node.warn("Object input");//DEBUG
+                if (!!msg.completedSymbols){
+                    node.warn("Using protected msg property 'msg.completedSymbols', this is overwritten when parsing an object of symbol:[bars]",msg);
                 }
-                node.send(msg);
-                node.status(err?{text:"ERROR",fill:"red"}:{});
-            };
-            let analyze = async (fx, data, opt) => {
-                try{
-                    let call_fx = new alphacate[fx](opt);
-                    call_fx.setValues(data);
-                    let result = await call_fx.calculate();
-                    if (fx == "MACD") result = mergeMACD(result); 
-                    if (config.mergeData){
-                        for (var j in msg.payload){
-                            delete result[j].price;
-                            let keys = Object.keys(result[j]);
-                            if (keys.length == 1){
-                                result[j] = result[j][keys[0]];
-                            }
-                            msg.payload[j][fx] = result[j];
-                        }
-                    }else{
-                        msg.payload[fx] = result;
+                msg.completedSymbols = {};
+                /*if (!config.mergeData){
+                    //this doesn't work with object type, giving up on for now.
+                    if(!!msg.data){
+                        node.warn("Using protected msg property 'msg.data', this is overwritten when not using the Merge Data option",msg);
                     }
-                    msg.options[fx] = call_fx._options;
-                    msg.config = config;
-                    resolveComplete(fx);
-                }catch(err){
-                    node.error("Analysis Error (" +fx+ "):  " + err.message, msg);
-                    resolveComplete(fx);
+                    msg.data = {};
+                }*/
+                for (var key in msg.payload){
+                   // node.warn("completeness init " + key);//DEBUG
+                    if(Array.isArray(msg.payload[key])){
+                        msg.completedSymbols[key] = false;
+                    }
+                }// would call from above loop but want to avoid race condition
+                for (key in msg.completedSymbols){
+                    //node.warn("calling analysis " + key);//DEBUG
+                    analyzeData(node, config, msg, msg.payload[key], key);
                 }
-            };
-            
-            for (var fn of allFunctions){
-                if (config["enable" + fn]){ //ie 'enableRSI'
-                    // to confirm when all asyncs are done,
-                    completedFunctions[fn] = false;
-                    let options = {
-                        ...config.options,
-                        ...msg.options,
-                        ...{lazyEvaluation: false}
-                    };
-                    analyze(fn, special_data[fn] || input_data, options);
-                }
+            }else{
+                node.error("Unsupported input type",msg);
             }
         });
+    }
+    
+    function analyzeData(node, config, msg, bar_data, obj_key = false){
+    
+        node.status({text:"calculating...",fill:"blue"});
+        node.warn("analysis call... " + obj_key);
+        let input_data = [];
+        let special_data = {
+            ATR: [],
+            MFI: [],
+            OBV: []
+        };
+        for (var dp in bar_data){
+            input_data.push(bar_data[dp][config.useData]);
+            // specify here to handle indicators----
+            // with non-default input requirements--
+            special_data.ATR.push({
+                high:  bar_data[dp].highPrice,
+                low:   bar_data[dp].lowPrice,
+                close: bar_data[dp].closePrice
+            });
+            special_data.MFI.push({
+                high:  bar_data[dp].highPrice,
+                low:   bar_data[dp].lowPrice,
+                close: bar_data[dp].closePrice,
+                volume:bar_data[dp].volume
+            });
+            special_data.OBV.push({
+                price: bar_data[dp][config.useData],
+                volume:bar_data[dp].volume
+            });
+        }
+        if (!config.mergeData){
+            if(!!obj_key){
+                msg.data[obj_key] = JSON.parse(JSON.stringify(bar_data));
+            }else{
+                msg.data = JSON.parse(JSON.stringify(bar_data));
+            }
+            bar_data = [];
+        }
+        msg.options = {};
+        // call all the enabled indicators
+        let completedFunctions = {}; // used as "done" test
+        // define calculation handler
+        let resolveComplete = function(fx, err = false){
+            completedFunctions[fx] = true;
+            for(var f in completedFunctions){
+                if(!completedFunctions[f]) return;
+            }
+            if(!!obj_key){
+                // ^ test if parsing object of symbols and check if complete
+                //node.warn("completeness check " + obj_key);//DEBUG
+                msg.completedSymbols[obj_key] = true;
+                for(var s in msg.completedSymbols){
+                    if(!msg.completedSymbols[s]) return;
+                }
+            }
+            node.send(msg);
+            node.status(err?{text:"ERROR",fill:"red"}:{});
+        };
+        let analyze = async (fx, data, opt) => {
+            try{
+                let call_fx = new alphacate[fx](opt);
+                call_fx.setValues(data);
+                let result = await call_fx.calculate();
+                if (fx == "MACD") result = mergeMACD(result); 
+                if (config.mergeData){
+                    for (var j in bar_data){
+                        delete result[j].price;
+                        let keys = Object.keys(result[j]);
+                        if (keys.length == 1){
+                            result[j] = result[j][keys[0]];
+                        }
+                        bar_data[j][fx] = result[j];
+                    }
+                }else{
+                    node.send(bar_data);
+                    bar_data[fx] = result;
+                }
+                msg.options[fx] = call_fx._options;
+                msg.config = config;
+                resolveComplete(fx);
+            }catch(err){
+                node.error("Analysis Error (" +fx+ "):  " + err.message, msg);
+                resolveComplete(fx);
+            }
+        };
+        
+        for (var fn of allFunctions){
+            if (config["enable" + fn]){ //ie 'enableRSI'
+                // to confirm when all asyncs are done,
+                completedFunctions[fn] = false;
+                let options = {
+                    ...config.options,
+                    ...msg.options,
+                    ...{lazyEvaluation: false}
+                };
+                analyze(fn, special_data[fn] || input_data, options);
+            }
+        }
     }
     
     RED.nodes.registerType("alphacate",alphacateNode);

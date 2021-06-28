@@ -6,7 +6,7 @@
         defaults: {
             name:       { value: "" },
             useData:  { value: "closePrice" },
-            mergeData:  { value: false },
+            mergeData:  { value: true },
             enableATR:  { value: false },
             enableBB:  { value: false },
             enableEMA:  { value: false },
@@ -71,10 +71,11 @@
             <option value=	"lowPrice">	    Low	    </option>
         </select>
     </div>
-    <div class="form-row checkbox-row">
+    <!--div class="form-row checkbox-row">
+    <!-- this was becoming too complicated and I don't think it's actually useful anyways>
         <input type="checkbox" id="node-input-mergeData">
         <label for="node-input-mergeData"> Merge Input Data and Analysis Data</label>
-    </div>
+    </div-->
     <h3> Technical Indicators </h3>
     <div class="form-row checkbox-row">
         <input type="checkbox" id="node-input-enableATR">

@@ -18,7 +18,9 @@
     "node-red",
     "stocks",
     "stock market",
-    "trading"
+    "trading",
+    "technical analysis",
+    "technical indicators"
   ],
   "author": "Matthew Krieg",
   "license": "MIT",
@@ -27,6 +29,6 @@
   },
   "homepage": "https://github.com/mdkrieg/node-red-contrib-alphacate#readme",
   "dependencies": {
-    "alphacate": "file:../alphacate"
+    "alphacate": "github:mdkrieg/alphacate"
   }
 }
