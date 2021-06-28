@@ -30,6 +30,7 @@ Based on npm package **alphacate**, link to GitHub for more information: https:/
 
 ## Release Notes
 1.0.1 - documentation and cleanup
+
 1.0.0 - initial release
 
 ## TODO / Roadmap
