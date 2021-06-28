@@ -1,6 +1,39 @@
 # node-red-contrib-alphacate
-Node-RED node for calculating technical analysis for stock trading
+For calculating technical indicators for stock trading.
 
-Currently designed to work seamlessly with Alpaca via **node-red-contrib-alpaca** or **node-red-contrib-alpaca-simple**
+Designed to work seamlessly with Alpaca via [**node-red-contrib-alpaca**](https://flows.nodered.org/node/node-red-contrib-alpaca) or [**node-red-contrib-alpaca-simple**](https://flows.nodered.org/node/node-red-contrib-alpaca-simple).
 
+Based on npm package **alphacate**, link to GitHub for more information: https://github.com/codeplayr/alphacate.
 
+## Features
+
+* Connects seamlessly with Alpaca's getBars function
+* Calculate several indicators at once
+* Calculate several tickers' data at once
+
+![image](https://user-images.githubusercontent.com/66855036/123717050-a523e900-d841-11eb-8295-351c4faff6ed.png)
+
+### List of supported indicators:
+ * **ATR** - AverageTrueRange
+ * **BB** - BollingerBands
+ * **EMA** - ExponentialMovingAverage
+ * **LWMA** - LinearlyWeightedMovingAverage
+ * **MACD** - MovingAverageConvergenceDivergence
+ * **MFI** - MoneyFlowIndex
+ * **OBV** - OnBalanceVolume
+ * **RSI** - RelativeStrengthIndex
+ * **SMA** - SimpleMovingAverage
+ * **SMMA** - SmoothedMovingAverage
+ * **SO** - StochasticOscillator
+ * **ROC** - RateOfChange
+ * **WMA** - WeightedMovingAverage
+
+## Release Notes
+1.0.1 - documentation and cleanup
+1.0.0 - initial release
+
+## TODO / Roadmap
+* [ ] !!! Add ability to change calculation settings / options
+* [ ] Include examples
+* [ ] Create options to customize input data scheme
+* [ ] (similarly) Create options to connect seamlessly to other data sources (alphavantage, finnhub, polygon, etc)
