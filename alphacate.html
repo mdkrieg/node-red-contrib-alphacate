@@ -133,21 +133,40 @@
 </script>
 
 <script type="text/x-red" data-help-name="alphacate">
-    <p>Universal node that wraps all of the </p>
+    <p> See <a href="https://github.com/codeplayr/alphacate">this project on GitHub</a> for more help</p>
     <h3>Inputs</h3>
-    <p>See configuration panel for examples of each request </p>
+    <p> Node expects an array of bars in this format:
+<pre>
+msg.payload = [
+    {
+        closePrice,
+        openPrice,
+        highPrice,
+        lowPrice,
+        volume
+    },
+    ...
+]
+</pre>
+        The above format is designed to work seamlessly with Alpaca.
+        
+        Additionally, the bar arrays can be supplied in the form of:
+<pre>
+msg.payload = {
+    TICKER1:[
+        Array of Bars
+    ],
+    TICKER2:[
+        Array of Bars
+    ]
+}
+</pre>
+        </p>
+        <p> NOTE: currently only the default options (periods, etc) are supported.
+        These are passed to the output as msg.options.</p>
     <h3>Outputs</h3>
-    <dl class="message-properties">
-        <dt>payload
-           <span class="property-type">object</span>
-       </dt>
-        <h3>Details</h3>
-        <p>Payload is the full response object from the API</p>
-        <dt>topic
-           <span class="property-type">string</span>
-       </dt>
-        <h3>Details</h3>
-        <p>Topic is the type of event being emitted from the node</p>
+        <p>The node will merge the data onto the input bars and pass them out as msg.payload.
+        When only a single datapoint is output it will be stored as a primitive, else it's stored as an object.</p>
 </script>
 
 <!-- http://rickkas7.github.io/mustache/
@@ -244,3 +263,4 @@ WMA:WeightedMovingAverage
 		]
 	]
 }
+-->

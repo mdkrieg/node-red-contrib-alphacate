@@ -39,7 +39,6 @@ module.exports = function(RED) {
                 analyzeData(node, config, msg, msg.payload);
             }else if (typeof msg.payload === 'object' && msg.payload !== null){
                 // Parse as object of {"Symbol": [bars]}
-                //node.warn("Object input");//DEBUG
                 if (!!msg.completedSymbols){
                     node.warn("Using protected msg property 'msg.completedSymbols', this is overwritten when parsing an object of symbol:[bars]",msg);
                 }
@@ -52,13 +51,11 @@ module.exports = function(RED) {
                     msg.data = {};
                 }*/
                 for (var key in msg.payload){
-                   // node.warn("completeness init " + key);//DEBUG
                     if(Array.isArray(msg.payload[key])){
                         msg.completedSymbols[key] = false;
                     }
                 }// would call from above loop but want to avoid race condition
                 for (key in msg.completedSymbols){
-                    //node.warn("calling analysis " + key);//DEBUG
                     analyzeData(node, config, msg, msg.payload[key], key);
                 }
             }else{
@@ -70,7 +67,6 @@ module.exports = function(RED) {
     function analyzeData(node, config, msg, bar_data, obj_key = false){
     
         node.status({text:"calculating...",fill:"blue"});
-        node.warn("analysis call... " + obj_key);
         let input_data = [];
         let special_data = {
             ATR: [],
@@ -116,7 +112,6 @@ module.exports = function(RED) {
             }
             if(!!obj_key){
                 // ^ test if parsing object of symbols and check if complete
-                //node.warn("completeness check " + obj_key);//DEBUG
                 msg.completedSymbols[obj_key] = true;
                 for(var s in msg.completedSymbols){
                     if(!msg.completedSymbols[s]) return;
@@ -145,7 +140,7 @@ module.exports = function(RED) {
                     bar_data[fx] = result;
                 }
                 msg.options[fx] = call_fx._options;
-                msg.config = config;
+                //msg.config = config; //DEBUG
                 resolveComplete(fx);
             }catch(err){
                 node.error("Analysis Error (" +fx+ "):  " + err.message, msg);
