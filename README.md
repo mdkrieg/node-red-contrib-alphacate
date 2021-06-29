@@ -28,6 +28,38 @@ Based on npm package **alphacate**, link to GitHub for more information: https:/
  * **ROC** - RateOfChange
  * **WMA** - WeightedMovingAverage
 
+## Instructions
+
+There are **two valid options** for the format of the incoming msg.payload.
+
+First option is a single array of bars:
+
+```
+msg.payload = [
+    {
+        closePrice,
+        openPrice,
+        highPrice,
+        lowPrice,
+        volume
+    },
+    ...
+]
+```
+
+Second option is an object of tickers that each contain an array of bars as outlined above:
+
+```
+msg.payload = {
+    TICKER1:[
+        Array of Bars
+    ],
+    TICKER2:[
+        Array of Bars
+    ]
+}
+```
+
 ## Release Notes
 1.0.1 - documentation and cleanup
 
