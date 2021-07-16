@@ -5,6 +5,8 @@ Designed to work seamlessly with Alpaca via [**node-red-contrib-alpaca**](https:
 
 Based on npm package **alphacate**, link to GitHub for more information: https://github.com/codeplayr/alphacate.
 
+NOTE: The package.json calls for a fork of the above mentioned repository as there were a couple fixes that had to be made to the original code, https://github.com/mdkrieg/alphacate
+
 ## Features
 
 * Connects seamlessly with Alpaca's getBars function
