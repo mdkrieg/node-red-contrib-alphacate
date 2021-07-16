@@ -60,13 +60,41 @@ msg.payload = {
 }
 ```
 
+Options can be left as default or assigned through the configuration panel or passed in as msg.options.
+
+Available options are:
+
+```
+msg.options = {
+  "ATR": { "periods": 20 },
+  "BB": { "periods": 20 },
+  "EMA": { "periods": 12, "emaResultsOnly": false, startWithFirst": false },
+  "LWMA": { "periods": 20 },
+  "MACD": { "fastPeriods": 12, "slowPeriods": 26, "signalPeriods": 9 },
+  "MFI": { "periods": 14 },
+  "OBV": {},
+  "RSI": { "periods": 14 },
+  "SMA": { "periods": 10 },
+  "SMMA": { "periods": 20 },
+  "SO": { "periods": 14, "smaPeriods": 3 },
+  "ROC": { "periods": 14 },
+  "WMA": { "periods": 14 }
+]
+```
+
+
 ## Release Notes
+1.1.0 - added ability to change calculation settings in both config and documented in the help the method of doing it in msg.options object
+
 1.0.1 - documentation and cleanup
 
 1.0.0 - initial release
 
 ## TODO / Roadmap
-* [ ] !!! Add ability to change calculation settings / options
+* [x] !!! Add ability to change calculation settings / options
 * [ ] Include examples
 * [ ] Create options to customize input data scheme
-* [ ] (similarly) Create options to connect seamlessly to other data sources (alphavantage, finnhub, polygon, etc)
+* [ ] ^---(similarly) Create options to connect seamlessly to other data sources (alphavantage, finnhub, polygon, etc)
+* [ ] Add more indicators that can be calculated from OHCLV bars:
+* [ ] ---- AD (Accum/Dist)
+* [ ] ---- WPR (Williams % R)

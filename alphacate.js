@@ -13,6 +13,16 @@ module.exports = function(RED) {
         }
     }
     
+    function removeExtraOptions(options){
+        var temp_opt = options;
+        delete temp_opt.lazyEvaluation;
+        delete temp_opt.sliceOffset;
+        delete temp_opt.startIndex;
+        delete temp_opt.endIndex;
+        delete temp_opt.maxTickDuration;
+        return temp_opt;
+    }
+    
     function mergeMACD(data){
         let macdResult = [];
         for(var i in data[0].prices){ //strange but it puts the data in a 1-element array
@@ -116,6 +126,7 @@ module.exports = function(RED) {
                 for(var s in msg.completedSymbols){
                     if(!msg.completedSymbols[s]) return;
                 }
+                delete msg.completedSymbols;
             }
             node.send(msg);
             node.status(err?{text:"ERROR",fill:"red"}:{});
@@ -139,7 +150,7 @@ module.exports = function(RED) {
                     node.send(bar_data);
                     bar_data[fx] = result;
                 }
-                msg.options[fx] = call_fx._options;
+                msg.options[fx] = removeExtraOptions(call_fx._options);
                 //msg.config = config; //DEBUG
                 resolveComplete(fx);
             }catch(err){
@@ -148,13 +159,21 @@ module.exports = function(RED) {
             }
         };
         
+        // below is the "caller" statement
         for (var fn of allFunctions){
             if (config["enable" + fn]){ //ie 'enableRSI'
-                // to confirm when all asyncs are done,
+                // below is a store to confirm when all asyncs are done,
                 completedFunctions[fn] = false;
+                let parsed_config = {};
+                for(var key in config){
+                    let key_parts = key.split("_");
+                    if(key_parts[0] == "option" && key_parts[1] == fn){
+                        parsed_config[key_parts[2]] = config[key];
+                    }
+                }
                 let options = {
-                    ...config.options,
-                    ...msg.options,
+                    ...parsed_config,
+                    ...msg.options[fn],
                     ...{lazyEvaluation: false}
                 };
                 analyze(fn, special_data[fn] || input_data, options);

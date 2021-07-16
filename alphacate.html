@@ -1,6 +1,17 @@
 <script type="text/javascript">
     /* global RED */
-    RED.nodes.registerType('alphacate', {
+    // below defaults are copy pasted from the output of get_defaults.js
+    const defaults = [{"fn":"ATR","name":"AverageTrueRange","options":{"periods":20}},{"fn":"BB","name":"BollingerBands","options":{"periods":20}},{"fn":"EMA","name":"ExponentialMovingAverage","options":{"periods":12,"emaResultsOnly":false,"startWithFirst":false}},{"fn":"LWMA","name":"LinearlyWeightedMovingAverage","options":{"periods":20}},{"fn":"MACD","name":"MovingAverageConvergenceDivergence","options":{"fastPeriods":12,"slowPeriods":26,"signalPeriods":9}},{"fn":"MFI","name":"MoneyFlowIndex","options":{"periods":14}},{"fn":"OBV","name":"OnBalanceVolume","options":{}},{"fn":"RSI","name":"RelativeStrengthIndex","options":{"periods":14}},{"fn":"SMA","name":"SimpleMovingAverage","options":{"periods":10}},{"fn":"SMMA","name":"SmoothedMovingAverage","options":{"periods":20}},{"fn":"SO","name":"StochasticOscillator","options":{"periods":14,"smaPeriods":3}},{"fn":"ROC","name":"RateOfChange","options":{"periods":14}},{"fn":"WMA","name":"WeightedMovingAverage","options":{"periods":14}}];
+    const option_input_types = {
+        periods: "input",
+        emaResultsOnly: "checkbox",
+        startWithFirst: "checkbox",
+        fastPeriods: "input",
+        slowPeriods: "input",
+        signalPeriods: "input",
+        smaPeriods: "input"
+    };
+    var registration_object = {
         category: 'stocks',
         color: '#DDDDDD',
         defaults: {
@@ -34,7 +45,16 @@
             let suffix = (count > 0) ? " (" + count + ")" : "" ;
             return this.name || "alphacate" + suffix;
         }
+    };
+    
+    defaults.forEach((item) => {
+        for (var op_name in item.options){
+            var option_variable_name = "option_" + item.fn + "_" + op_name;
+            registration_object.defaults[option_variable_name] = {value: item.options[op_name] };
+        }
     });
+    
+    RED.nodes.registerType('alphacate', registration_object);
 
 </script>
 
@@ -43,18 +63,33 @@
 <!------------------------------------------------------------------------------------->
 <style type="text/css">
     .checkbox-row label{
-        width:350px !important;
+        width:300px !important;
     }
     .checkbox-row input{
         width:50px !important;
         margin-top: 0px !important;
+    }
+    .checkbox-row{
+        margin-bottom: 2px !important;
+    }
+    .checkbox-row .show-options{
+        cursor:pointer;
     }
     .short-name{
         width: 65px;
         float:left;
         font-weight:bold;
     }
+    .alphacate-options{
+        margin-bottom: 5px;
+    }
+    .alphacate-options label{
+        width:200px !important;
+        text-align:right;
+        margin-right:50px;
+    }
 </style>
+
 <script type="text/x-red" data-template-name="alphacate">
     <!-----------------NAME--------------------->
     <div class="form-row">
@@ -77,64 +112,126 @@
         <label for="node-input-mergeData"> Merge Input Data and Analysis Data</label>
     </div-->
     <h3> Technical Indicators </h3>
-    <div class="form-row checkbox-row">
+
+<!--- start template copy paste --->
+
+    <div class="form-row checkbox-row" id="form-row-ATR">
         <input type="checkbox" id="node-input-enableATR">
         <label for="node-input-enableATR"><span class="short-name">ATR</span> <small>AverageTrueRange</small></label>
+        <span style="float:right"><i class="fa fa-cog show-options"></i></span>
+        <div class="alphacate-options"></div>
     </div>
-    <div class="form-row checkbox-row">
+    <div class="form-row checkbox-row" id="form-row-BB">
         <input type="checkbox" id="node-input-enableBB">
         <label for="node-input-enableBB"><span class="short-name">BB</span> <small>BollingerBands</small></label>
+        <span style="float:right"><i class="fa fa-cog show-options"></i></span>
+        <div class="alphacate-options"></div>
     </div>
-    <div class="form-row checkbox-row">
+    <div class="form-row checkbox-row" id="form-row-EMA">
         <input type="checkbox" id="node-input-enableEMA">
         <label for="node-input-enableEMA"><span class="short-name">EMA</span> <small>ExponentialMovingAverage</small></label>
+        <span style="float:right"><i class="fa fa-cog show-options"></i></span>
+        <div class="alphacate-options"></div>
     </div>
-    <div class="form-row checkbox-row">
+    <div class="form-row checkbox-row" id="form-row-LWMA">
         <input type="checkbox" id="node-input-enableLWMA">
         <label for="node-input-enableLWMA"><span class="short-name">LWMA</span> <small>LinearlyWeightedMovingAverage</small></label>
+        <span style="float:right"><i class="fa fa-cog show-options"></i></span>
+        <div class="alphacate-options"></div>
     </div>
-    <div class="form-row checkbox-row">
+    <div class="form-row checkbox-row" id="form-row-MACD">
         <input type="checkbox" id="node-input-enableMACD">
         <label for="node-input-enableMACD"><span class="short-name">MACD</span> <small>MovingAverageConvergenceDivergence</small></label>
+        <span style="float:right"><i class="fa fa-cog show-options"></i></span>
+        <div class="alphacate-options"></div>
     </div>
-    <div class="form-row checkbox-row">
+    <div class="form-row checkbox-row" id="form-row-MFI">
         <input type="checkbox" id="node-input-enableMFI">
         <label for="node-input-enableMFI"><span class="short-name">MFI</span> <small>MoneyFlowIndex</small></label>
+        <span style="float:right"><i class="fa fa-cog show-options"></i></span>
+        <div class="alphacate-options"></div>
     </div>
-    <div class="form-row checkbox-row">
+    <div class="form-row checkbox-row" id="form-row-OBV">
         <input type="checkbox" id="node-input-enableOBV">
         <label for="node-input-enableOBV"><span class="short-name">OBV</span> <small>OnBalanceVolume</small></label>
+        <span style="float:right"><i class="fa fa-cog show-options"></i></span>
+        <div class="alphacate-options"></div>
     </div>
-    <div class="form-row checkbox-row">
+    <div class="form-row checkbox-row" id="form-row-RSI">
         <input type="checkbox" id="node-input-enableRSI">
         <label for="node-input-enableRSI"><span class="short-name">RSI</span> <small>RelativeStrengthIndex</small></label>
+        <span style="float:right"><i class="fa fa-cog show-options"></i></span>
+        <div class="alphacate-options"></div>
     </div>
-    <div class="form-row checkbox-row">
+    <div class="form-row checkbox-row" id="form-row-SMA">
         <input type="checkbox" id="node-input-enableSMA">
         <label for="node-input-enableSMA"><span class="short-name">SMA</span> <small>SimpleMovingAverage</small></label>
+        <span style="float:right"><i class="fa fa-cog show-options"></i></span>
+        <div class="alphacate-options"></div>
     </div>
-    <div class="form-row checkbox-row">
+    <div class="form-row checkbox-row" id="form-row-SMMA">
         <input type="checkbox" id="node-input-enableSMMA">
         <label for="node-input-enableSMMA"><span class="short-name">SMMA</span> <small>SmoothedMovingAverage</small></label>
+        <span style="float:right"><i class="fa fa-cog show-options"></i></span>
+        <div class="alphacate-options"></div>
     </div>
-    <div class="form-row checkbox-row">
+    <div class="form-row checkbox-row" id="form-row-SO">
         <input type="checkbox" id="node-input-enableSO">
         <label for="node-input-enableSO"><span class="short-name">SO</span> <small>StochasticOscillator</small></label>
+        <span style="float:right"><i class="fa fa-cog show-options"></i></span>
+        <div class="alphacate-options"></div>
     </div>
-    <div class="form-row checkbox-row">
+    <div class="form-row checkbox-row" id="form-row-ROC">
         <input type="checkbox" id="node-input-enableROC">
         <label for="node-input-enableROC"><span class="short-name">ROC</span> <small>RateOfChange</small></label>
+        <span style="float:right"><i class="fa fa-cog show-options"></i></span>
+        <div class="alphacate-options"></div>
     </div>
-    <div class="form-row checkbox-row">
+    <div class="form-row checkbox-row" id="form-row-WMA">
         <input type="checkbox" id="node-input-enableWMA">
         <label for="node-input-enableWMA"><span class="short-name">WMA</span> <small>WeightedMovingAverage</small></label>
+        <span style="float:right"><i class="fa fa-cog show-options"></i></span>
+        <div class="alphacate-options"></div>
     </div>
+
+<!--- end template copy paste --->
+
+    <script type="text/javascript">
+        /* global $ defaults option_input_types registration_object */
+        $(document).ready(function(){
+            // attach click to settings cog
+            $(".show-options").hide().on("click", function(){
+                console.log("toggle show options");
+                $(this).parents(".form-row").find(".alphacate-options").toggle();
+            }).parents(".form-row").find(".alphacate-options").hide();
+            // populate with relevant options
+            defaults.forEach((item) => {
+                for (var op_name in item.options){
+                    var id_name = "option_"+item.fn+"_"+op_name;
+                    var in_type = option_input_types[op_name];
+                    var $options = $("#form-row-" + item.fn + " .alphacate-options");
+                    var content = $options.html();
+                    var default_param = "";
+                    if(in_type == "input"){
+                        default_param = " value=\""+registration_object.defaults[id_name].value+"\"";
+                    }else if(in_type == "checkbox"){
+                        default_param = registration_object.defaults[id_name].value? " checked" : "";
+                    }
+                    var new_content = "<label for=\"node-input-"+id_name+"\">"+op_name+"</label>";
+                    new_content += "<input type=\""+in_type+"\" id=\"node-input-"+id_name+"\""+default_param+">";
+                    $options.html(content + new_content);
+                    $("#form-row-"+item.fn+" .show-options").show();
+                }
+            });
+        });
+    </script>
 
 </script>
 
 <script type="text/x-red" data-help-name="alphacate">
     <p> See <a href="https://github.com/codeplayr/alphacate">this project on GitHub</a> for more help</p>
     <h3>Inputs</h3>
+    <h4>OHCLV Bars Format:</h4>
     <p> Node expects an array of bars in this format:
 <pre>
 msg.payload = [
@@ -148,9 +245,9 @@ msg.payload = [
     ...
 ]
 </pre>
-        The above format is designed to work seamlessly with Alpaca.
-        
-        Additionally, the bar arrays can be supplied in the form of:
+    The above format is designed to work seamlessly with Alpaca.
+    
+    Additionally, the bar arrays can be supplied in the form of:
 <pre>
 msg.payload = {
     TICKER1:[
@@ -161,11 +258,27 @@ msg.payload = {
     ]
 }
 </pre>
-        </p>
-        <p> NOTE: currently only the default options (periods, etc) are supported.
-        These are passed to the output as msg.options.</p>
+    </p>
+    <h4>Setting Options Dynammically</h4>
+    <p>
+        The options can be customized in the configuration pane by clicking the <i class="fa fa-cog"></i> cog icon.
+        Or by passing them in a <code>msg.options</code> object nested into keys that match the indicator / function name, for example:
+<pre>
+msg.options = {
+    "BB":{
+        "periods":20
+    },
+    "MACD":{
+        "fastPeriods":12,
+        "slowPeriods":26,
+        "signalPeriods":9
+    }
+}
+</pre>
+        You can also look at the output <code>msg.options</code> object for reference.
+    </p>
     <h3>Outputs</h3>
-        <p>The node will merge the data onto the input bars and pass them out as msg.payload.
+        <p>The node will merge the data onto the input bars on the <code>msg.payload</code> object.
         When only a single datapoint is output it will be stored as a primitive, else it's stored as an object.</p>
 </script>
 
@@ -182,9 +295,11 @@ mustache template for development:
 --------- HTML Checkboxes -----
 
 {{#a}}
-    <div class="form-row checkbox-row">
+    <div class="form-row checkbox-row" id="form-row-{{0}}">
         <input type="checkbox" id="node-input-enable{{0}}">
         <label for="node-input-enable{{0}}"><span class="short-name">{{0}}</span> <small>{{1}}</small></label>
+        <span style="float:right"><i class="fa fa-cog show-options"></i></span>
+        <div class="alphacate-options"></div>
     </div>
 {{/a}}
 
